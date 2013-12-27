@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 
 using namespace std;
 
@@ -13,6 +14,8 @@ enum Color
     BLACK,
     WHITE
 };
+
+typedef vector<vector<Color> > BOARD;
 
 void dump_board( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
@@ -190,18 +193,28 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
 
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
-        if ( put( board, x, self_color ) &&
-             pop( board, x ) &&
-             getWinner( board ) == self_color )
-        return x;
+        bool put_ok = put( board, x, self_color );
+        bool is_win = ( getWinner( board ) == self_color );
+        if ( put_ok )
+            pop( board, x );
+        if ( is_win )
+        {
+            cout << "good " << x << endl;
+            return x;
+        }
     }
 
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
-        if ( put( board, x, oppo_color ) &&
-             pop( board, x ) &&
-             getWinner( board ) == oppo_color )
-        return x;
+        bool put_ok = put( board, x, oppo_color );
+        bool is_lose = ( getWinner( board ) == oppo_color );
+        if ( put_ok )
+            pop( board, x );
+        if ( is_lose )
+        {
+            cout << "good " << x << endl;
+            return x;
+        }
     }
 
     return -1;
@@ -235,7 +248,7 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
             while ( true )
             {
                 // BLACK
-                int good_BLACK_x = getGoodX( board, BLACK );
+                int good_BLACK_x = getGoodX( temp_board, BLACK );
                 if ( good_BLACK_x != -1 ) return good_BLACK_x;
 
                 int put_BLACK_x = -1;
@@ -263,7 +276,7 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                 }
 
                 // WHITE
-                int good_WHITE_x = getGoodX( board, WHITE );
+                int good_WHITE_x = getGoodX( temp_board, WHITE );
                 if ( good_WHITE_x != -1 ) return good_WHITE_x;
                 int put_WHITE_x = -1;
                 while ( true )
