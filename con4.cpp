@@ -200,7 +200,7 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
             pop( board, x );
         if ( is_win )
         {
-            cout << "good " << x << endl;
+            // cout << "good " << x << endl;
             return x;
         }
     }
@@ -213,7 +213,7 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
             pop( board, x );
         if ( is_lose )
         {
-            cout << "good " << x << endl;
+            // cout << "good " << x << endl;
             return x;
         }
     }
@@ -223,12 +223,13 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
 
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 10000;
+    const int AI_STRONG = 3000;
     Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     int x_win_count[BOARD_WIDTH] = { 0 };
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
+        if ( board[BOARD_HEIGHT - 1][x] != EMPTY ) continue;
         for ( int try_idx = 0; try_idx < AI_STRONG; try_idx++ )
         {
             // init board and chess_count
@@ -245,59 +246,99 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                 }
             }
 
+            // put 1st at x
+            if ( !put( temp_board, x, BLACK ) )
+            {
+                cout << "fatal error!" << endl;
+                break;
+            }
+            Color winner = getWinner( temp_board );
+            if ( winner == BLACK )
+            {
+                x_win_count[x]++;
+                continue;
+            }
+            chess_count++;
+            if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
+            {
+                // cout << "1" << chess_count << endl;
+                // dump_board( temp_board );
+                continue;
+            }
+
             // monte carlo
             while ( true )
             {
-                // BLACK
-                int good_BLACK_x = getGoodX( temp_board, BLACK );
-                if ( good_BLACK_x != -1 ) return good_BLACK_x;
-
-                int put_BLACK_x = -1;
-                while ( true )
-                {
-                    put_BLACK_x = rand() % BOARD_WIDTH;
-                    if ( put( temp_board, put_BLACK_x, BLACK ) )
-                    {
-                        break;
-                    }
-                }
-                chess_count++;
-                if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
-                {
-                    break;
-                }
-                Color winner = getWinner( temp_board );
-                if ( winner == BLACK )
-                {
-                    x_win_count[put_BLACK_x]++;
-                }
-                if ( winner != EMPTY )
-                {
-                    break;
-                }
-
                 // WHITE
-                int good_WHITE_x = getGoodX( temp_board, WHITE );
-                if ( good_WHITE_x != -1 ) return good_WHITE_x;
-                int put_WHITE_x = -1;
-                while ( true )
                 {
-                    put_WHITE_x = rand() % BOARD_WIDTH;
-                    if ( put( temp_board, put_WHITE_x, WHITE ) )
+                    int put_WHITE_x = -1;
+                    int good_WHITE_x = getGoodX( temp_board, WHITE );
+                    // cout << good_WHITE_x << endl;
+                    if ( good_WHITE_x != -1 )
                     {
+                        put_WHITE_x = good_WHITE_x;
+                        put( temp_board, put_WHITE_x, WHITE );
+                    }
+                    else
+                    {
+                        while ( true )
+                        {
+                            put_WHITE_x = rand() % BOARD_WIDTH;
+                            if ( put( temp_board, put_WHITE_x, WHITE ) )
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    chess_count++;
+                    if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
+                    {
+                        // cout << "2" << chess_count << endl;
+                        // dump_board( temp_board );
+                        break;
+                    }
+                    Color winner = getWinner( temp_board );
+                    if ( winner == WHITE )
+                    {
+                        // x_win_count[x]--;
+                        //dump_board( temp_board );
                         break;
                     }
                 }
-                chess_count++;
-                if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
+
+                // BLACK
                 {
-                    break;
-                }
-                winner = getWinner( temp_board );
-                if ( winner == WHITE )
-                {
-                    x_win_count[put_BLACK_x]--;
-                    break;
+                    int put_BLACK_x = -1;
+                    int good_BLACK_x = getGoodX( temp_board, BLACK );
+                    if ( good_BLACK_x != -1 )
+                    {
+                        put_BLACK_x = good_BLACK_x;
+                        put( temp_board, put_BLACK_x, BLACK );
+                    }
+                    else
+                    {
+                        while ( true )
+                        {
+                            put_BLACK_x = rand() % BOARD_WIDTH;
+                            if ( put( temp_board, put_BLACK_x, BLACK ) )
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    chess_count++;
+                    if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
+                    {
+                        // cout << "3" << chess_count << endl;
+                        // dump_board( temp_board );
+                        break;
+                    }
+                    Color winner = getWinner( temp_board );
+                    if ( winner == BLACK )
+                    {
+                        x_win_count[x]++;
+                        break;
+                    }
                 }
             }
         }
@@ -305,8 +346,9 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 
     int max_i = 0;
     int max_v = x_win_count[0];
-    for ( int i = 1; i < BOARD_WIDTH; ++i )
+    for ( int i = 0; i < BOARD_WIDTH; ++i )
     {
+        cout << x_win_count[i] << endl;
         if ( max_v < x_win_count[i] )
         {
             max_v = x_win_count[i];
