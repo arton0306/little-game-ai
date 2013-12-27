@@ -169,9 +169,47 @@ bool put( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x, Color color )
     return false;
 }
 
+bool pop( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x )
+{
+    for ( int y = BOARD_HEIGHT - 1; y >= 0; --y )
+    {
+        if ( board[y][x] != EMPTY )
+        {
+            board[y][x] = EMPTY;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
+{
+    Color self_color = color;
+    Color oppo_color = (Color)( BLACK + WHITE - color );
+
+    for ( int x = 0; x < BOARD_WIDTH; ++x )
+    {
+        if ( put( board, x, self_color ) &&
+             pop( board, x ) &&
+             getWinner( board ) == self_color )
+        return x;
+    }
+
+    for ( int x = 0; x < BOARD_WIDTH; ++x )
+    {
+        if ( put( board, x, oppo_color ) &&
+             pop( board, x ) &&
+             getWinner( board ) == oppo_color )
+        return x;
+    }
+
+    return -1;
+}
+
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 10000;
+    const int AI_STRONG = 1000;
     Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     int x_win_count[BOARD_WIDTH] = { 0 };
@@ -197,6 +235,9 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
             while ( true )
             {
                 // BLACK
+                int good_BLACK_x = getGoodX( board, BLACK );
+                if ( good_BLACK_x != -1 ) return good_BLACK_x;
+
                 int put_BLACK_x = -1;
                 while ( true )
                 {
@@ -222,6 +263,8 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                 }
 
                 // WHITE
+                int good_WHITE_x = getGoodX( board, WHITE );
+                if ( good_WHITE_x != -1 ) return good_WHITE_x;
                 int put_WHITE_x = -1;
                 while ( true )
                 {
