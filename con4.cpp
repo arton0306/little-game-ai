@@ -261,8 +261,6 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
             chess_count++;
             if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
             {
-                // cout << "1" << chess_count << endl;
-                // dump_board( temp_board );
                 continue;
             }
 
@@ -273,7 +271,6 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                 {
                     int put_WHITE_x = -1;
                     int good_WHITE_x = getGoodX( temp_board, WHITE );
-                    // cout << good_WHITE_x << endl;
                     if ( good_WHITE_x != -1 )
                     {
                         put_WHITE_x = good_WHITE_x;
@@ -293,8 +290,6 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                     chess_count++;
                     if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
                     {
-                        // cout << "2" << chess_count << endl;
-                        // dump_board( temp_board );
                         break;
                     }
                     Color winner = getWinner( temp_board );
@@ -329,8 +324,6 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                     chess_count++;
                     if ( chess_count == BOARD_HEIGHT * BOARD_WIDTH )
                     {
-                        // cout << "3" << chess_count << endl;
-                        // dump_board( temp_board );
                         break;
                     }
                     Color winner = getWinner( temp_board );
@@ -356,7 +349,21 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
         }
     }
 
-    return max_i;
+    if ( max_i != 0 )
+        return max_i;
+    else
+    {
+        for ( int x = 0; x < BOARD_WIDTH; ++x )
+        {
+            if ( board[BOARD_HEIGHT - 1][x] == EMPTY )
+            {
+                return x;
+            }
+        }
+    }
+
+    cout << "full board!" << endl;
+    return -1;
 }
 
 int main()
@@ -396,7 +403,12 @@ int main()
     }
     while ( true )
     {
-        put( board, ai( board ), BLACK );
+        int ai_x = ai( board );
+        if ( ai_x == -1 )
+        {
+            cout << "draw!" << endl;
+        }
+        put( board, ai_x, BLACK );
         Color winner = getWinner( board );
         dump_board( board );
         if ( winner != EMPTY )
