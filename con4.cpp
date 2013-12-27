@@ -1,11 +1,12 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <time.h>
 
 using namespace std;
 
-const int BOARD_WIDTH = 8;
-const int BOARD_HEIGHT = 8;
+const int BOARD_WIDTH = 7;
+const int BOARD_HEIGHT = 6;
 const int CON_NUM_TO_WIN = 4;
 
 enum Color
