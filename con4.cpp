@@ -93,7 +93,7 @@ bool put( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x, Color color )
 
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 10000;
+    const int AI_STRONG = 50000;
     Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     int x_win_count[BOARD_WIDTH] = { 0 };
