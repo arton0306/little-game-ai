@@ -223,7 +223,7 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
 
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 1000;
+    const int AI_STRONG = 10000;
     Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     int x_win_count[BOARD_WIDTH] = { 0 };
