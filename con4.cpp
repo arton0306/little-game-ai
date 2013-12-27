@@ -32,6 +32,83 @@ void dump_board( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
     cout << "01234567" << endl;
 }
 
+Color getLineCheck( Color board[BOARD_HEIGHT][BOARD_WIDTH], int y0, int x0, int dy, int dx )
+{
+    int con_num = 1;
+    Color prev_grid = board[y0][x0];
+    int r = y0;
+    int c = x0;
+    while ( true )
+    {
+        r += dy;
+        c += dx;
+        if ( r >= BOARD_HEIGHT || c >= BOARD_WIDTH || r < 0 || c < 0 )
+        {
+            break;
+        }
+        Color grid = board[r][c];
+        if ( grid == prev_grid )
+        {
+            con_num++;
+        }
+        else
+        {
+            con_num = 1;
+            prev_grid = grid;
+        }
+        if ( con_num == CON_NUM_TO_WIN && grid != EMPTY )
+        {
+            return grid;
+        }
+    }
+
+    return EMPTY;
+}
+
+Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
+{
+    // check horizontal
+    for ( int y = 0; y < BOARD_HEIGHT; ++y )
+    {
+        Color c = getLineCheck( board, y, 0, 0, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check vertical
+    for ( int x = 0; x < BOARD_WIDTH; ++x )
+    {
+        Color c = getLineCheck( board, 0, x, 1, 0 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check slash
+    for ( int y = 0; y < BOARD_HEIGHT; ++y )
+    {
+        Color c = getLineCheck( board, y, 0, -1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+    for ( int x = 1; x < BOARD_WIDTH; ++x )
+    {
+        Color c = getLineCheck( board, BOARD_HEIGHT - 1, x, -1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check backslash
+    for ( int y = 0; y < BOARD_HEIGHT; ++y )
+    {
+        Color c = getLineCheck( board, y, 0, 1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+    for ( int x = 1; x < BOARD_WIDTH; ++x )
+    {
+        Color c = getLineCheck( board, 0, x, 1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    return EMPTY;
+}
+
+/*
 Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
     const int Dirc = 4;
@@ -76,6 +153,7 @@ Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 
     return EMPTY;
 }
+*/
 
 bool put( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x, Color color )
 {
