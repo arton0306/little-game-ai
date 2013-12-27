@@ -33,7 +33,7 @@ void dump_board( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
         }
         cout << endl;
     }
-    cout << "01234567" << endl;
+    cout << "0123456" << endl;
 }
 
 Color getLineCheck( Color board[BOARD_HEIGHT][BOARD_WIDTH], int y0, int x0, int dy, int dx )
