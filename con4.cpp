@@ -228,6 +228,8 @@ bool pop( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x )
         if ( board[y][x] != EMPTY )
         {
             board[y][x] = EMPTY;
+            last_put_x = -1;
+            last_put_y = -1;
             return true;
         }
     }
