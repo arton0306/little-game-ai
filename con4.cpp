@@ -483,6 +483,7 @@ int main()
         put( board, ai_x, BLACK );
         Color winner = getWinner( board );
         dump_board( board );
+        cout << "computer put at " << ai_x << endl;
         if ( winner != EMPTY )
         {
             cout << ( winner == WHITE ? "you win!\n" : "comp win!\n" );
