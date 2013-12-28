@@ -294,7 +294,6 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
         int good_BLACK_x = getGoodX( board, BLACK );
         if ( good_BLACK_x != -1 )
         {
-            put( board, good_BLACK_x, BLACK );
             return good_BLACK_x;
         }
     }
