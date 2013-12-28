@@ -11,6 +11,7 @@ using namespace std;
 const int BOARD_WIDTH = 7;
 const int BOARD_HEIGHT = 6;
 const int CON_NUM_TO_WIN = 4;
+const int AI_STRONG = 10000;
 int last_put_x = -1;
 int last_put_y = -1;
 
@@ -288,10 +289,19 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
 
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 10000;
-    Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
+    // must put testing
+    {
+        int good_BLACK_x = getGoodX( board, BLACK );
+        if ( good_BLACK_x != -1 )
+        {
+            put( board, good_BLACK_x, BLACK );
+            return good_BLACK_x;
+        }
+    }
 
+    // monte carlo
     int x_win_count[BOARD_WIDTH] = { 0 };
+    Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
         if ( board[BOARD_HEIGHT - 1][x] != EMPTY ) continue;
@@ -329,7 +339,7 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
                 continue;
             }
 
-            // monte carlo
+            // rand
             while ( true )
             {
                 // WHITE
