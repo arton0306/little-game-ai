@@ -38,7 +38,11 @@ void dump_board( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
         }
         cout << endl;
     }
-    cout << "0123456" << endl;
+    for ( int i = 0; i < BOARD_WIDTH; ++i )
+    {
+        cout << i;
+    }
+    cout << endl;
 }
 
 Color getLineCheck( Color board[BOARD_HEIGHT][BOARD_WIDTH], int y0, int x0, int dy, int dx )
@@ -207,6 +211,11 @@ Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 
 bool put( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x, Color color )
 {
+    if ( x >= BOARD_WIDTH )
+    {
+        cout << "fatal error: put on outside board" << endl;
+        return false;
+    }
     for ( int y = 0; y < BOARD_HEIGHT; ++y )
     {
         if ( board[y][x] == EMPTY )
@@ -422,6 +431,23 @@ int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
     return -1;
 }
 
+void user_input( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
+{
+    int x;
+    while ( true )
+    {
+        cout << "put 0-" << BOARD_WIDTH - 1 << endl;
+        cin >> x;
+        if ( x >= BOARD_WIDTH ) continue;
+
+        if ( put( board, x, WHITE ) )
+        {
+            dump_board( board );
+            break;
+        }
+    }
+}
+
 int main()
 {
     srand (time(NULL));
@@ -444,18 +470,8 @@ int main()
 
     if ( you_first == 1 )
     {
-        int x;
         dump_board( board );
-        while ( true )
-        {
-            cout << "put 0-7" << endl;
-            cin >> x;
-            if ( put( board, x, WHITE ) )
-            {
-                dump_board( board );
-                break;
-            }
-        }
+        user_input( board );
     }
     while ( true )
     {
@@ -472,17 +488,7 @@ int main()
             cout << ( winner == WHITE ? "you win!\n" : "comp win!\n" );
             return 0;
         }
-        while ( true )
-        {
-            int x;
-            cout << "put 0-7" << endl;
-            cin >> x;
-            if ( put( board, x, WHITE ) )
-            {
-                dump_board( board );
-                break;
-            }
-        }
+        user_input( board );
         winner = getWinner( board );
         if ( winner != EMPTY )
         {
@@ -490,9 +496,6 @@ int main()
             return 0;
         }
     }
-
-    // cout << getWinner( board );
-    // cout << ai( board );
 
     return 0;
 }
