@@ -3,11 +3,16 @@
 #include <vector>
 #include <time.h>
 
+#define getWinner getWinner_by_last_chess
+//#define getWinner getWinner_by_all
+
 using namespace std;
 
 const int BOARD_WIDTH = 7;
 const int BOARD_HEIGHT = 6;
 const int CON_NUM_TO_WIN = 4;
+int last_put_x = -1;
+int last_put_y = -1;
 
 enum Color
 {
@@ -69,7 +74,7 @@ Color getLineCheck( Color board[BOARD_HEIGHT][BOARD_WIDTH], int y0, int x0, int 
     return EMPTY;
 }
 
-Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
+Color getWinner_by_all( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
     // check horizontal
     for ( int y = 0; y < BOARD_HEIGHT; ++y )
@@ -106,6 +111,47 @@ Color getWinner( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
     for ( int x = 1; x < BOARD_WIDTH; ++x )
     {
         Color c = getLineCheck( board, 0, x, 1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    return EMPTY;
+}
+
+Color getWinner_by_last_chess( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
+{
+    if ( last_put_x == -1 )
+    {
+        cout << "fatal error: impossible";
+        return EMPTY;
+    }
+
+    // check horizontal
+    {
+        Color c = getLineCheck( board, last_put_y, 0, 0, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check vertical
+    {
+        Color c = getLineCheck( board, 0, last_put_x, 1, 0 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check slash
+    {
+        int bx = last_put_x;
+        int by = BOARD_HEIGHT - last_put_y - 1;
+        int m = min( bx, by );
+        Color c = getLineCheck( board, last_put_y + m, last_put_x - m, -1, 1 );
+        if ( c != EMPTY ) return c;
+    }
+
+    // check backslash
+    {
+        int bx = last_put_x;
+        int by = last_put_y;
+        int m = min( bx, by );
+        Color c = getLineCheck( board, last_put_y - m, last_put_x - m, 1, 1 );
         if ( c != EMPTY ) return c;
     }
 
@@ -166,6 +212,8 @@ bool put( Color board[BOARD_HEIGHT][BOARD_WIDTH], int x, Color color )
         if ( board[y][x] == EMPTY )
         {
             board[y][x] = color;
+            last_put_x = x;
+            last_put_y = y;
             return true;
         }
     }
@@ -195,9 +243,12 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
         bool put_ok = put( board, x, self_color );
-        bool is_win = ( getWinner( board ) == self_color );
+        bool is_win = false;
         if ( put_ok )
+        {
+            is_win = ( getWinner( board ) == self_color );
             pop( board, x );
+        }
         if ( is_win )
         {
             // cout << "good " << x << endl;
@@ -208,9 +259,12 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
     for ( int x = 0; x < BOARD_WIDTH; ++x )
     {
         bool put_ok = put( board, x, oppo_color );
-        bool is_lose = ( getWinner( board ) == oppo_color );
+        bool is_lose = false;
         if ( put_ok )
+        {
+            is_lose = ( getWinner( board ) == oppo_color );
             pop( board, x );
+        }
         if ( is_lose )
         {
             // cout << "good " << x << endl;
@@ -223,7 +277,7 @@ int getGoodX( Color board[BOARD_HEIGHT][BOARD_WIDTH], Color color )
 
 int ai( Color board[BOARD_HEIGHT][BOARD_WIDTH] )
 {
-    const int AI_STRONG = 3000;
+    const int AI_STRONG = 10000;
     Color temp_board[BOARD_HEIGHT][BOARD_WIDTH];
 
     int x_win_count[BOARD_WIDTH] = { 0 };
