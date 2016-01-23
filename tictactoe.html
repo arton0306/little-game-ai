@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TicTacToe</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="3600" />
+
+        <style>
+            #msg {
+                color: #333333;
+                font-size:36px;
+                text-shadow: -2px 2px #cccccc;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- <canvas id="canvas" width="500px" height="500px" style="border:2px solid #000000;"> -->
+        <canvas id="canvas" width="500px" height="500px" style="border:2px solid #cccccc;">
+        </canvas>
+
+        <div id="msg"> Test </div>
+
+    </body>
+
+    <script language="JavaScript">
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        // var board = [0,1,2, 0,2,2, 1,1,1];
+        var board = [0,0,0, 0,0,0, 0,0,0];
+        var fadeIdx = -1;
+
+        var drawGrid = function() {
+            var w = canvas.offsetWidth;
+            var h = canvas.offsetHeight;
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#000000";
+            ctx.moveTo(0, h*1/3); ctx.lineTo(w, h*1/3);
+            ctx.moveTo(0, h*2/3); ctx.lineTo(w, h*2/3);
+            ctx.moveTo(w*1/3, 0); ctx.lineTo(w*1/3, h);
+            ctx.moveTo(w*2/3, 0); ctx.lineTo(w*2/3, h);
+            ctx.stroke();
+        };
+
+        var GRID_EMPTY = 0;
+        var GRID_O = 1;
+        var GRID_X = 2;
+
+        /**
+         * @param pos: 0~8
+         * @param c: GRID_O, GRID_X
+         */
+        var drawOX = function(pos, c, isFade = false) {
+            var gridW = canvas.offsetWidth / 3;
+            var gridH = canvas.offsetHeight / 3;
+            var cntrX = gridW * (pos%3) + gridW/2;
+            var cntrY = gridH * Math.floor(pos/3) + gridH/2;
+
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.strokeStyle = (isFade ? "#dddddd" : "#000000");
+            var oxW = gridW * 0.33;
+            if (c == GRID_O) {
+                ctx.arc(cntrX, cntrY, oxW, 0, 2*Math.PI);
+            } else if (c == GRID_X) {
+                var scale = oxW
+                ctx.moveTo(cntrX-oxW, cntrY-oxW);
+                ctx.lineTo(cntrX+oxW, cntrY+oxW);
+                ctx.moveTo(cntrX+oxW, cntrY-oxW);
+                ctx.lineTo(cntrX-oxW, cntrY+oxW);
+            } else {
+                // invalid param
+            }
+            ctx.stroke();
+        };
+
+        var xy2pos = function(x, y) {
+            var gridW = canvas.offsetWidth / 3;
+            var gridH = canvas.offsetHeight / 3;
+            var pos = Math.floor(x/gridW) + 3*Math.floor(y/gridH);
+            return pos;
+        };
+
+        var drawBoard = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            for (var i = 0; i < 9; i++) {
+                if (board[i] != GRID_EMPTY) {
+                     drawOX(i, board[i], i==fadeIdx);
+                }
+            }
+        };
+
+        var checkWin = function(ox) {
+            for (var i = 0; i < 3; i++) {
+                if ((board[3*i] == ox && board[3*i+1] == ox && board[3*i+2] == ox) || 
+                    (board[0+i] == ox && board[3*1+i] == ox && board[3*2+i] == ox)) {
+                    return true;    
+                }
+            }
+            if (board[0] == ox && board[4] == ox && board[8] == ox) return true;
+            if (board[2] == ox && board[4] == ox && board[6] == ox) return true;
+            return false;
+        };
+
+        var getEmptyCnt = function() {
+            return board.filter(function(v){return v==GRID_EMPTY}).length;
+        };
+        var isBoardFull = function() {
+            return getEmptyCnt() == 0;
+        };
+
+        var randEmptyPos = function() {
+            while (true) {
+                pos = Math.floor(Math.random() * 9);
+                if (board[pos] == GRID_EMPTY) {
+                    return pos;
+                }
+            }
+        };
+        var firstEmptyPos = function() {
+            for (var pos = 0; pos < 9; ++pos) {
+                if (board[pos] == GRID_EMPTY) {
+                    return pos;
+                }
+            }
+        }
+
+        /**
+         * Return (pos, result)
+         * if there is some pos to win, (a pos to win, 1)
+         * elif some pos is draw, (a pos to draw, 0)
+         * else (a pos to lost, -1)
+         *
+         * @param ox: GRID_O GRID_X GRID_EMPTY
+         */
+        var ai = function(ox) {
+            for (var i = 0; i < 9; ++i) {
+                if (board[i] == GRID_EMPTY) {
+                    board[i] = ox;
+                    if (checkWin(ox)) {
+                        board[i] = GRID_EMPTY;
+                        //console.log({pos:i, result:1});
+                        return {pos:i, result:1};
+                    }
+                    board[i] = GRID_EMPTY;
+                }
+            }
+            if (getEmptyCnt() == 1) {
+                //console.log({pos:firstEmptyPos(), result:0});
+                return {pos:firstEmptyPos(), result:0};
+            }
+            var opMin = Infinity;
+            var aipos = -1;
+            for (var i = 0; i < 9; ++i) {
+                if (board[i] == GRID_EMPTY) {
+                    board[i] = ox;
+                    var op = ai(GRID_O+GRID_X-ox);
+                    if (opMin > op.result) {
+                        opMin = op.result;
+                        aipos = i;
+                    }
+                    board[i] = GRID_EMPTY;
+                }
+            }            
+            //console.log({pos:aipos, result:opMin*(-1)});
+            //TODO: handle 0 and -0
+            return {pos:aipos, result:opMin*(-1)};
+        }
+
+        drawBoard();
+        canvas.addEventListener("mousemove", function(event) {
+            var x = event.clientX - canvas.getBoundingClientRect().left;
+            var y = event.clientY - canvas.getBoundingClientRect().top;
+            var pos = xy2pos(x, y);
+            // console.log("move %d %d: pos:%d", x, y, pos);
+            if (board[pos] == GRID_EMPTY) {
+                fadeIdx = pos;
+                board[pos] = GRID_O;
+                drawBoard();
+                board[pos] = GRID_EMPTY;
+            } else {
+                drawBoard();
+            }
+        });
+
+        //board[randEmptyPos()] = GRID_X;
+        board[0] = GRID_X;
+        drawBoard();
+
+        canvas.addEventListener("click", function(event) {
+            var x = event.clientX;
+            var y = event.clientY;
+            var pos = xy2pos(x, y);
+            // console.log("click %d %d: pos:%d", x, y, pos);
+            if (board[pos] == GRID_EMPTY) {
+                console.log("fill %d GRID_O", pos);
+                board[pos] = GRID_O;
+                fadeIdx = -1;
+
+                if (!isBoardFull()) {
+                    var comp = ai(GRID_X);
+                    console.log("pos:%d result:%d", comp.pos, comp.result);
+                    board[comp.pos] = GRID_X;
+                    // console.log(board);
+                    drawBoard();
+                }
+            }
+        });
+
+        canvas.addEventListener("mouseout", function(event) {
+            fadeIdx = -1;
+            drawBoard();
+        });
+    </script>
+</html>
